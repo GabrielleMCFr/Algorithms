@@ -14,7 +14,7 @@ namespace Code.algorithms;
 // Complexity : 
 // BellmanFord O(VE), Dijkstra O(ElogV) for each vertex, so O(V*ElogV)
 // so total : O(VE + V*ELogV) simplifié a O(V*ElogV)
-class Johnson
+public class Johnson
 {
     // represents an edge in the graph
     public class Edge

@@ -27,7 +27,7 @@ namespace Code.algorithms.Graphs;
 //
 // Time Complexity: O(V^3)
 // Space Complexity: O(V^2) due to the dist matrix
-class FloydWarshall
+public class FloydWarshall
 {
     public static void FloydWarshallAlgorithm(int[,] graph, int vertices)
     {

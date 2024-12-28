@@ -33,7 +33,7 @@ namespace Code.algorithms;
 // - O(ElogV) when using a priority queue and an adjacency list representation.
 // - O(V^2) for dense graphs with adjacency matrix representation.
 // - O(EV) for simpler implementations (e.g., adjacency list without a priority queue).
-class PrimAlgorithm
+public class PrimAlgorithm
 {
     public static void PrimMST(int vertices, List<(int, int)>[] graph)
     {
