@@ -63,8 +63,9 @@ public class BinaryLiftingLCA
         }
     }
 
-    public int Query(int u, int v)
+    public int GetBinaryLiftingLCA(int u, int v)
     {
+        // if v is deeper, we swap them so u is always the deepest node.
         if (Depth[u] < Depth[v])
         {
             int temp = u;
@@ -84,7 +85,9 @@ public class BinaryLiftingLCA
 
         if (u == v) return u; // if they meet, return one of them as the LCA
 
-        // Lift both u and v until their ancestors converge
+        // lift both u and v until their ancestors converge
+        // here, we check from the highest power of 2 (the root), where it has to converge and go down in powers of two jumps, until it doesn't converge anymore.
+        // when it doesn't converge anymore, that means the parent is the LCA.
         for (int j = Log; j >= 0; j--)
         {
             if (Ancestors[u, j] != Ancestors[v, j])
@@ -95,6 +98,35 @@ public class BinaryLiftingLCA
         }
 
         return Ancestors[u, 0]; // the parent of u (or v) is the LCA
+    }
+
+    // for reference, technically we don't need any preprocessing for brute force, but it illustrates the difference.
+    // we just go one node up each time instead of jumping by powers of 2.
+    public int BruteForceLCA(int u, int v)
+    {
+        // if v is deeper, we swap them so u is always the deepest node.
+        if (Depth[u] < Depth[v])
+        {
+            int temp = u;
+            u = v;
+            v = temp;
+        }
+
+        // Bring u and v to the same depth
+        while (Depth[u] > Depth[v]) {
+            // we put u as its parent. Meaning depth - 1.
+            u = Ancestors[u, 0];
+        }
+
+        if (u == v) return u; // if they meet, return one of them as the LCA
+
+        // Lift both u and v until their ancestors converge
+        while (u != v) {
+            u = Ancestors[u, 0]; 
+            v = Ancestors[v, 0];
+        }
+
+        return u; // the parent of u (or v) is the LCA
     }
 
     public static void Main(string[] args)
@@ -113,8 +145,8 @@ public class BinaryLiftingLCA
         lca.Preprocess(0); // preprocess the tree with 0 as the root
 
         // perform LCA queries
-        Console.WriteLine(lca.Query(3, 4)); // output: 1
-        Console.WriteLine(lca.Query(3, 6)); // output: 0
-        Console.WriteLine(lca.Query(5, 6)); // output: 2
+        Console.WriteLine(lca.GetBinaryLiftingLCA(3, 4)); // output: 1
+        Console.WriteLine(lca.GetBinaryLiftingLCA(3, 6)); // output: 0
+        Console.WriteLine(lca.GetBinaryLiftingLCA(5, 6)); // output: 2
     }
 }
