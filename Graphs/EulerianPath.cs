@@ -42,14 +42,17 @@ public class EulerianPath
         }
     }
 
-    public List<int> FindEulerianPath(Graph graph)
+    public List<int>? FindEulerianPath(Graph graph)
     {
-        // check for Eulerian path
+        // work on a cloned adjacency list to avoid modifying the original graph
+        var adjList = CloneAdjacencyList(graph.AdjList);
+
+        // check for Eulerian path by counting vertices with odd degree
         int startVertex = -1, oddCount = 0;
 
-        foreach (var vertex in graph.AdjList.Keys)
+        foreach (var vertex in adjList.Keys)
         {
-            if (graph.AdjList[vertex].Count % 2 != 0)
+            if (adjList[vertex].Count % 2 != 0)
             {
                 oddCount++;
                 startVertex = vertex; // pick an odd-degree vertex as the starting point
@@ -62,15 +65,9 @@ public class EulerianPath
 
         // if all degrees are even, start from any vertex
         if (startVertex == -1)
-            startVertex = graph.AdjList.Keys.First();
+            startVertex = adjList.Keys.First();
 
-        // sort adjacency lists for deterministic traversal order
-        foreach (var vertex in graph.AdjList.Keys)
-        {
-            graph.AdjList[vertex].Sort();
-        }
-
-        // perform Hierholzer's algorithm
+        // initialize stack for dfs-like traversal and a list to store the path
         Stack<int> stack = new();
         List<int> path = new();
 
@@ -80,26 +77,83 @@ public class EulerianPath
         {
             int current = stack.Peek();
 
-            // if the current vertex has no more unvisited edges, add to path
-            if (!graph.AdjList.ContainsKey(current) || graph.AdjList[current].Count == 0)
+            // if the current vertex has no unvisited edges, add it to the path
+            if (!adjList.ContainsKey(current) || adjList[current].Count == 0)
             {
                 path.Add(current);
-                stack.Pop();
+                stack.Pop(); // backtrack to previous vertex
             }
             else
             {
                 // move to the next vertex and remove the edge
-                int next = graph.AdjList[current][0];
-                graph.AdjList[current].Remove(next);
-                graph.AdjList[next].Remove(current);
+                int next = adjList[current][0];
+                adjList[current].Remove(next);
+                adjList[next].Remove(current);
 
-                stack.Push(next);
+                stack.Push(next); // continue traversal from the next vertex
             }
         }
 
         // reverse the path to get the correct traversal order
         path.Reverse();
         return path;
+    }
+
+    public List<int>? FindEulerianCircuit(Graph graph)
+    {
+        // work on a cloned adjacency list to avoid modifying the original graph
+        var adjList = CloneAdjacencyList(graph.AdjList);
+
+        // check if the graph has an Eulerian circuit
+        if (!HasEulerianCircuit(graph))
+            return null;
+
+        // start from any vertex since all vertices have even degree
+        int startVertex = adjList.Keys.First();
+
+        // initialize stack for dfs-like traversal and a list to store the circuit
+        Stack<int> stack = new();
+        List<int> circuit = new();
+
+        stack.Push(startVertex);
+
+        while (stack.Count > 0)
+        {
+            int current = stack.Peek();
+
+            // if the current vertex has no unvisited edges, add it to the circuit
+            if (!adjList.ContainsKey(current) || adjList[current].Count == 0)
+            {
+                circuit.Add(current);
+                stack.Pop(); // backtrack to previous vertex
+            }
+            else
+            {
+                // move to the next vertex and remove the edge
+                int next = adjList[current][0];
+                adjList[current].Remove(next);
+                adjList[next].Remove(current);
+
+                stack.Push(next); // continue traversal from the next vertex
+            }
+        }
+
+        // verify that the circuit forms a closed loop
+        if (circuit.Count > 1 && circuit[0] == circuit[^1])
+            return circuit;
+
+        return null; // return null if the circuit is not closed
+    }
+
+    private Dictionary<int, List<int>> CloneAdjacencyList(Dictionary<int, List<int>> original)
+    {
+        // create a deep copy of the adjacency list to avoid modifying the original graph
+        var clone = new Dictionary<int, List<int>>();
+        foreach (var vertex in original.Keys)
+        {
+            clone[vertex] = new List<int>(original[vertex]);
+        }
+        return clone;
     }
 
     public bool HasEulerianCircuit(Graph graph)
@@ -142,7 +196,7 @@ public class EulerianPath
         // create a graph
         Graph graph = new Graph();
         graph.AddEdge(0, 1);
-        graph.AddEdge(0, 2);
+        graph.AddEdge(0, 2); // comment this for an eulerian circuit
         graph.AddEdge(1, 2);
         graph.AddEdge(2, 3);
         graph.AddEdge(3, 0);
@@ -150,13 +204,15 @@ public class EulerianPath
         var ep = new EulerianPath();
 
         // check for Eulerian circuit
-        if (ep.HasEulerianCircuit(graph))
+        List<int> circuit = ep.FindEulerianCircuit(graph);
+        if (circuit != null)
         {
-            Console.WriteLine("The graph has an Eulerian circuit.");
+            Console.WriteLine("Eulerian circuit:");
+            Console.WriteLine(string.Join(" -> ", circuit));
         }
         else
         {
-            Console.WriteLine("The graph does not have an Eulerian circuit.");
+            Console.WriteLine("No Eulerian circuit exists.");
         }
 
         // find Eulerian path

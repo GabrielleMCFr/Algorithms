@@ -42,7 +42,7 @@ namespace Code.algorithms;
 // The forward edges have residual capacities equal to the original capacity minus the current flow.
 // The reverse edges have residual capacities equal to the current flow.
 //
-// Time complexity : at worst, O(E*V^2). Since each BFS takes O(V+E) and at worst, it will be repeated E times.
+// Time complexity : at worst, O(V*E^2). Since each BFS takes O(V+E) and at worst, it will be repeated E times.
 public class EdmondsKarp
 {
     public class FlowNetwork

@@ -12,8 +12,7 @@ namespace Code.algorithms;
 //
 // note : Johnson is more efficient than FloydWharsall on sparse graphs.
 // Complexity : 
-// BellmanFord O(VE), Dijkstra O(ElogV) for each vertex, so O(V*ElogV)
-// so total : O(VE + V*ELogV) simplifié a O(V*ElogV)
+// so total : O(V*E + (V^2)LogV)
 public class Johnson
 {
     // represents an edge in the graph
