@@ -99,6 +99,56 @@ public class Graph
         Console.WriteLine();
     }
 
+    // BFS in matrix
+    static void BFS(List<List<char>> grid, int startRow, int startCol)
+    {
+        int rows = grid.Count;
+        int cols = grid[0].Count;
+
+        // directions for moving: up, down, left, right
+        int[][] directions = new int[][]
+        {
+            new int[] {-1, 0}, // up
+            new int[] {1, 0},  // down
+            new int[] {0, -1}, // left
+            new int[] {0, 1}   // right
+        };
+
+        // queue for BFS
+        Queue<(int row, int col)> queue = new Queue<(int, int)>();
+
+        // visited set
+        HashSet<(int, int)> visited = new HashSet<(int, int)>();
+
+        // enqueue the starting position and mark it as visited
+        queue.Enqueue((startRow, startCol));
+        visited.Add((startRow, startCol));
+
+        Console.WriteLine("BFS Traversal:");
+
+        while (queue.Count > 0)
+        {
+            // dequeue a cell
+            var (row, col) = queue.Dequeue();
+            Console.WriteLine($"Visiting: ({row}, {col})");
+
+            // process neighbors
+            foreach (var direction in directions)
+            {
+                int newRow = row + direction[0];
+                int newCol = col + direction[1];
+
+                // check bounds and whether the cell is unvisited and not blocked
+                if (newRow >= 0 && newRow < rows && newCol >= 0 && newCol < cols &&
+                    grid[newRow][newCol] != 'X' && !visited.Contains((newRow, newCol)))
+                {
+                    queue.Enqueue((newRow, newCol));
+                    visited.Add((newRow, newCol));
+                }
+            }
+        }
+    }
+
     // Recursive Depth-First Search 
     public void DFS(int startVertex)
     {

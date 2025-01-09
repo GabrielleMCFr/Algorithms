@@ -21,7 +21,6 @@ namespace Code.algorithms
     {
         private int Vertices;
         private List<Edge> Edges;
-
         public Graph(int vertices)
         {
             this.Vertices = vertices;
@@ -42,23 +41,36 @@ namespace Code.algorithms
         public void KruskalMST()
         {
             // sort edges by weight
+            // it guarantees that the edges with the less weight are considered first.
             Edges.Sort();
 
+            // used to handle connected composants in union find.
+            // initially, every node is it's own parent. (disconnected)
             int[] parent = new int[Vertices];
-            for (int i = 0; i < Vertices; i++)
+            int[] rank = new int[Vertices];
+
+            for (int i = 0; i < Vertices; i++) {
                 parent[i] = i;
+                rank[i] = 0;
+            }
+                
 
             List<Edge> mst = new List<Edge>();
             foreach (var edge in Edges)
             {
+                // for each edge, we check if the nodes considered in source and destination of the edge are in the same 'group'
+                // meaning, if they are connected, they will have the same root.
+                // we do that because if the source root and destination root are the same, it means it will form a cycle.
                 int rootSource = Find(parent, edge.Source);
                 int rootDestination = Find(parent, edge.Destination);
 
-                // meaning, there is no cycles.
+                // if they are different, there is no cycle.
+                // so we fuse the two groups.
+                // if they are the same, we ignore that edge, or it would form a cycle.
                 if (rootSource != rootDestination)
                 {
                     mst.Add(edge);
-                    Union(parent, rootSource, rootDestination);
+                    Union(parent, rank, rootSource, rootDestination);
                 }
             }
 
@@ -69,6 +81,11 @@ namespace Code.algorithms
             }
         }
 
+        // we find the root. this uses path compression to be quicker.
+        // How it works : When we call Find to determine the root of a node:
+        // - Traverse up the tree to find the root.
+        // - On the way back, update each node to point directly to the root.
+        // This flattens the tree structure, making future Find operations faster.
         private int Find(int[] parent, int vertex)
         {
             if (parent[vertex] != vertex)
@@ -76,9 +93,37 @@ namespace Code.algorithms
             return parent[vertex];
         }
 
-        private void Union(int[] parent, int sourceRoot, int destinationRoot)
+        // simple union for simplicity.
+        // could result in unbalanced trees, so better use union by rank.
+        // private void Union(int[] parent, int sourceRoot, int destinationRoot)
+        // {
+        //     parent[sourceRoot] = destinationRoot;
+        // }
+
+        // union with union by rank
+        // ensure the tree stay shallow
+        // the idea is to branch the shallower tree to the root of the deepest tree, to "spead" horizontally, and not vertically
+        public void Union(int[] parent, int[] rank, int x, int y)
         {
-            parent[sourceRoot] = destinationRoot;
+            int rootX = Find(parent, x);
+            int rootY = Find(parent, y);
+
+            if (rootX != rootY)
+            {
+                if (rank[rootX] > rank[rootY])
+                {
+                    parent[rootY] = rootX; // attach the smaller tree to the larger tree
+                }
+                else if (rank[rootX] < rank[rootY])
+                {
+                    parent[rootX] = rootY;
+                }
+                else
+                {
+                    parent[rootY] = rootX; // if ranks are equal, we choose one and increment its rank
+                    rank[rootX]++;
+                }
+            }
         }
     }
 
